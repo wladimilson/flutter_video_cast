@@ -51,21 +51,6 @@ class ChromeCastController(
             val languageText = args["languageText"] as? String
             val languageAudio = args["languageAudio"] as? String
 
-            Log.i("Lang", languageAudio)
-            Log.i("Lang", languageText)
-
-            sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.mediaTracks?.forEach { e ->
-                print(
-                    e.toString()
-                )
-            }
-            sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.mediaTracks?.forEach { e ->
-                Log.i(
-                    "Cast",
-                    e.toJson().toString()
-                )
-            }
-
             val selectedTrackAudio =
                 sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.mediaTracks?.find { e -> e.language == languageAudio && e.type == MediaTrack.TYPE_AUDIO }
             val selectedTrackText =
@@ -79,11 +64,7 @@ class ChromeCastController(
             if (selectedTrackAudio != null) {
                 listTrack.add(selectedTrackAudio.id)
             }
-
-            listTrack.toLongArray().forEach { e -> Log.i("idTrack", e.toString()) }
-
-            Log.i("LongArray", listTrack.toLongArray().toString())
-
+            
             val request =
                 sessionManager?.currentCastSession?.remoteMediaClient?.setActiveMediaTracks(
                     listTrack.toLongArray()
