@@ -15,14 +15,18 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
+import android.util.Log
+import com.google.android.gms.cast.MediaTrack
 
 class ChromeCastController(
-        messenger: BinaryMessenger,
-        viewId: Int,
-        context: Context?
-) : PlatformView, MethodChannel.MethodCallHandler, SessionManagerListener<Session>, PendingResult.StatusListener {
+    messenger: BinaryMessenger,
+    viewId: Int,
+    context: Context?
+) : PlatformView, MethodChannel.MethodCallHandler, SessionManagerListener<Session>,
+    PendingResult.StatusListener {
     private val channel = MethodChannel(messenger, "flutter_video_cast/chromeCast_$viewId")
-    private val chromeCastButton = MediaRouteButton(ContextThemeWrapper(context, R.style.Theme_AppCompat_NoActionBar))
+    private val chromeCastButton =
+        MediaRouteButton(ContextThemeWrapper(context, R.style.Theme_AppCompat_NoActionBar))
     private val sessionManager = CastContext.getSharedInstance()?.sessionManager
 
     init {
@@ -35,7 +39,56 @@ class ChromeCastController(
             val url = args["url"] as? String
             val media = MediaInfo.Builder(url).build()
             val options = MediaLoadOptions.Builder().build()
-            val request = sessionManager?.currentCastSession?.remoteMediaClient?.load(media, options)
+            val request =
+                sessionManager?.currentCastSession?.remoteMediaClient?.load(media, options)
+            request?.addStatusListener(this)
+            print("Loaded media")
+        }
+    }
+
+    private fun setMediaTrack(args: Any?) {
+        if (args is Map<*, *>) {
+            val languageText = args["languageText"] as? String
+            val languageAudio = args["languageAudio"] as? String
+
+            Log.i("Lang", languageAudio)
+            Log.i("Lang", languageText)
+
+            sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.mediaTracks?.forEach { e ->
+                print(
+                    e.toString()
+                )
+            }
+            sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.mediaTracks?.forEach { e ->
+                Log.i(
+                    "Cast",
+                    e.toJson().toString()
+                )
+            }
+
+            val selectedTrackAudio =
+                sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.mediaTracks?.find { e -> e.language == languageAudio && e.type == MediaTrack.TYPE_AUDIO }
+            val selectedTrackText =
+                sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.mediaTracks?.find { e -> e.language == languageText && e.type == MediaTrack.TYPE_TEXT }
+
+            val listTrack = ArrayList<Long>()
+
+            if (selectedTrackText != null) {
+                listTrack.add(selectedTrackText.id)
+            }
+            if (selectedTrackAudio != null) {
+                listTrack.add(selectedTrackAudio.id)
+            }
+
+            listTrack.toLongArray().forEach { e -> Log.i("idTrack", e.toString()) }
+
+            Log.i("LongArray", listTrack.toLongArray().toString())
+
+            val request =
+                sessionManager?.currentCastSession?.remoteMediaClient?.setActiveMediaTracks(
+                    listTrack.toLongArray()
+                )
+
             request?.addStatusListener(this)
         }
     }
@@ -56,9 +109,13 @@ class ChromeCastController(
             var interval = args["interval"] as? Double
             interval = interval?.times(1000)
             if (relative) {
-                interval = interval?.plus(sessionManager?.currentCastSession?.remoteMediaClient?.mediaStatus?.streamPosition ?: 0)
+                interval = interval?.plus(
+                    sessionManager?.currentCastSession?.remoteMediaClient?.mediaStatus?.streamPosition
+                        ?: 0
+                )
             }
-            val request = sessionManager?.currentCastSession?.remoteMediaClient?.seek(interval?.toLong() ?: 0)
+            val request =
+                sessionManager?.currentCastSession?.remoteMediaClient?.seek(interval?.toLong() ?: 0)
             request?.addStatusListener(this)
         }
     }
@@ -66,7 +123,9 @@ class ChromeCastController(
     private fun setVolume(args: Any?) {
         if (args is Map<*, *>) {
             val volume = args["volume"] as? Double
-            val request = sessionManager?.currentCastSession?.remoteMediaClient?.setStreamVolume(volume ?: 0.0)
+            val request = sessionManager?.currentCastSession?.remoteMediaClient?.setStreamVolume(
+                volume ?: 0.0
+            )
             request?.addStatusListener(this)
         }
     }
@@ -78,15 +137,18 @@ class ChromeCastController(
         request?.addStatusListener(this)
     }
 
-    private fun isPlaying() = sessionManager?.currentCastSession?.remoteMediaClient?.isPlaying ?: false
+    private fun isPlaying() =
+        sessionManager?.currentCastSession?.remoteMediaClient?.isPlaying ?: false
 
     private fun isConnected() = sessionManager?.currentCastSession?.isConnected ?: false
 
     private fun endSession() = sessionManager?.endCurrentSession(true)
 
-    private fun position() = sessionManager?.currentCastSession?.remoteMediaClient?.approximateStreamPosition ?: 0
+    private fun position() =
+        sessionManager?.currentCastSession?.remoteMediaClient?.approximateStreamPosition ?: 0
 
-    private fun duration() = sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.streamDuration ?: 0
+    private fun duration() =
+        sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.streamDuration ?: 0
 
     private fun addSessionListener() {
         sessionManager?.addSessionManagerListener(this)
@@ -105,10 +167,14 @@ class ChromeCastController(
     // Flutter methods handling
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-        when(call.method) {
+        when (call.method) {
             "chromeCast#wait" -> result.success(null)
             "chromeCast#loadMedia" -> {
                 loadMedia(call.arguments)
+                result.success(null)
+            }
+            "chromeCast#setMediaTrack" -> {
+                setMediaTrack(call.arguments)
                 result.success(null)
             }
             "chromeCast#play" -> {

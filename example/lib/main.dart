@@ -96,6 +96,7 @@ class _CastSampleState extends State<CastSample> {
             _RoundIconButton(
               icon: Icons.forward_10,
               onPressed: () => _controller.seek(relative: true, interval: 10.0),
+              // onPressed: () => _controller.setMediaTrack('eng', 'eng'),
             ),
           ],
         ),
@@ -174,7 +175,8 @@ class _CastSampleState extends State<CastSample> {
   Future<void> _onSessionStarted() async {
     setState(() => _state = AppState.connected);
     await _controller.loadMedia(
-      'http://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel.ism/.m3u8',
+      'https://stream-vod-mediabucket.s3.amazonaws.com/tests/mortalkombat2/mk-en.m3u8',
+      //'http://demo.unified-streaming.com/video/tears-of-steel/tears-of-steel.ism/.m3u8',
     );
   }
 

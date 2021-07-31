@@ -58,6 +58,12 @@ abstract class ChromeCastPlatform {
     throw UnimplementedError('loadMedia() has not been implemented.');
   }
 
+  @override
+  Future<void> setMediaTrack(String? languageAudio, String? languageText,
+      {required int id}) {
+    throw UnimplementedError('loadMedia() has not been implemented.');
+  }
+
   /// Plays the video playback.
   Future<void> play({required int id}) {
     throw UnimplementedError('play() has not been implemented.');
@@ -99,7 +105,6 @@ abstract class ChromeCastPlatform {
   Future<void> endSession({required int id}) {
     throw UnimplementedError('seek() has not been implemented.');
   }
-
 
   /// Returns `true` when a cast session is playing, `false` otherwise.
   Future<bool?> isPlaying({required int id}) {

@@ -30,6 +30,11 @@ class ChromeCastController {
     return _chromeCastPlatform.loadMedia(url, id: id);
   }
 
+  Future<void> setMediaTrack(String? languageAudio, String? languageText) {
+    return _chromeCastPlatform
+        .setMediaTrack(languageAudio ?? 'null', languageText ?? 'null', id: id);
+  }
+
   /// Plays the video playback.
   Future<void> play() {
     return _chromeCastPlatform.play(id: id);

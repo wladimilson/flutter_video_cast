@@ -77,6 +77,16 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
   }
 
   @override
+  Future<void> setMediaTrack(String? languageAudio, String? languageText,
+      {required int id}) {
+    final Map<String, dynamic> args = {
+      'languageAudio': languageAudio,
+      'languageText': languageText
+    };
+    return channel(id)!.invokeMethod<void>('chromeCast#setMediaTrack', args);
+  }
+
+  @override
   Future<void> play({required int id}) {
     return channel(id)!.invokeMethod<void>('chromeCast#play');
   }
