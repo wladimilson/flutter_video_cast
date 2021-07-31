@@ -76,6 +76,10 @@ class ChromeCastController: NSObject, FlutterPlatformView {
             loadMedia(args: call.arguments)
             result(nil)
             break
+        case "chromeCast#setMediaTrack":
+            setMediaTrack(args: call.arguments)
+            result(nil)
+            break
         case "chromeCast#play":
             play()
             result(nil)
@@ -124,6 +128,33 @@ class ChromeCastController: NSObject, FlutterPlatformView {
         if let request = sessionManager.currentCastSession?.remoteMediaClient?.loadMedia(mediaInformation) {
             request.delegate = self
         }
+    }
+
+    private func setMediaTrack(args: Any?) {
+        guard
+            let args = args as? [String: Any],
+            let languageText = args["languageText"] as? String,
+            let languageAudio = args["languageAudio"] as? String else{
+                return
+        }
+
+        let selectedTrackAudio = sessionManager.currentSession?.remoteMediaClient?.mediaStatus?.mediaInformation?.mediaTracks?.first(where: {$0.languageCode == languageAudio && $0.type == GCKMediaTrackType.audio})
+        let selectedTrackText = sessionManager.currentSession?.remoteMediaClient?.mediaStatus?.mediaInformation?.mediaTracks?.first(where: {$0.languageCode == languageText && $0.type == GCKMediaTrackType.text})
+
+        var listTrack: [NSNumber] = []
+
+        if (selectedTrackText != nil) {
+            listTrack.append(NSNumber.init(value: selectedTrackText!.identifier))
+        }
+        if (selectedTrackAudio != nil) {
+            listTrack.append(NSNumber.init(value: selectedTrackAudio!.identifier))
+        }
+        
+
+        if let request = sessionManager.currentSession?.remoteMediaClient?.setActiveTrackIDs(listTrack) {
+            request.delegate = self
+        }
+        
     }
 
     private func play() {
