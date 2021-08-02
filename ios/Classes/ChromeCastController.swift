@@ -138,8 +138,8 @@ class ChromeCastController: NSObject, FlutterPlatformView {
                 return
         }
 
-        let selectedTrackAudio = sessionManager.currentSession?.remoteMediaClient?.mediaStatus?.mediaInformation?.mediaTracks?.first(where: {$0.languageCode == languageAudio && $0.type == GCKMediaTrackType.audio})
-        let selectedTrackText = sessionManager.currentSession?.remoteMediaClient?.mediaStatus?.mediaInformation?.mediaTracks?.first(where: {$0.languageCode == languageText && $0.type == GCKMediaTrackType.text})
+        let selectedTrackAudio = sessionManager.currentSession?.remoteMediaClient?.mediaStatus?.mediaInformation?.mediaTracks?.first(where: {$0.name == languageAudio && $0.type == GCKMediaTrackType.audio})
+        let selectedTrackText = sessionManager.currentSession?.remoteMediaClient?.mediaStatus?.mediaInformation?.mediaTracks?.first(where: {$0.name == languageText && $0.type == GCKMediaTrackType.text})
 
         var listTrack: [NSNumber] = []
 

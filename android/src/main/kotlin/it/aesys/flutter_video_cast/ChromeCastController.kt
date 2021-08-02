@@ -52,9 +52,9 @@ class ChromeCastController(
             val languageAudio = args["languageAudio"] as? String
 
             val selectedTrackAudio =
-                sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.mediaTracks?.find { e -> e.language == languageAudio && e.type == MediaTrack.TYPE_AUDIO }
+                sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.mediaTracks?.find { e -> e.name == languageAudio && e.type == MediaTrack.TYPE_AUDIO }
             val selectedTrackText =
-                sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.mediaTracks?.find { e -> e.language == languageText && e.type == MediaTrack.TYPE_TEXT }
+                sessionManager?.currentCastSession?.remoteMediaClient?.mediaInfo?.mediaTracks?.find { e -> e.name == languageText && e.type == MediaTrack.TYPE_TEXT }
 
             val listTrack = ArrayList<Long>()
 

@@ -59,7 +59,7 @@ abstract class ChromeCastPlatform {
   }
 
   @override
-  Future<void> setMediaTrack(String? languageAudio, String? languageText,
+  Future<void> setMediaTrack(String? nameAudio, String? nameText,
       {required int id}) {
     throw UnimplementedError('loadMedia() has not been implemented.');
   }
