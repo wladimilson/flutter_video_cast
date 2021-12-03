@@ -1,20 +1,25 @@
 package it.aesys.flutter_video_cast
 
 import android.content.Context
+import android.util.Log
 import android.view.ContextThemeWrapper
 import androidx.mediarouter.app.MediaRouteButton
 import com.google.android.gms.cast.MediaInfo
 import com.google.android.gms.cast.MediaLoadOptions
+import com.google.android.gms.cast.MediaStatus
 import com.google.android.gms.cast.framework.CastButtonFactory
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.cast.framework.Session
+import com.google.android.gms.cast.framework.CastSession
 import com.google.android.gms.cast.framework.SessionManagerListener
+import com.google.android.gms.cast.framework.media.RemoteMediaClient
 import com.google.android.gms.common.api.PendingResult
 import com.google.android.gms.common.api.Status
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
+
 
 class ChromeCastController(
         messenger: BinaryMessenger,
@@ -96,6 +101,20 @@ class ChromeCastController(
         sessionManager?.removeSessionManagerListener(this)
     }
 
+    private val mRemoteMediaClientListener: RemoteMediaClient.Callback = object : RemoteMediaClient.Callback() {
+        override fun onStatusUpdated() {
+            val mediaStatus: MediaStatus? = sessionManager?.currentCastSession?.remoteMediaClient?.mediaStatus
+            val playerStatus: Int = mediaStatus?.playerState ?: MediaStatus.PLAYER_STATE_UNKNOWN
+            if (playerStatus == MediaStatus.PLAYER_STATE_PLAYING) {
+                channel.invokeMethod("chromeCast#didPlayerStatusUpdated", 1)
+            } else if (playerStatus == MediaStatus.PLAYER_STATE_BUFFERING) {
+                channel.invokeMethod("chromeCast#didPlayerStatusUpdated", 0)
+            } else if (playerStatus == MediaStatus.PLAYER_STATE_IDLE && mediaStatus?.getIdleReason() === MediaStatus.IDLE_REASON_FINISHED) {
+                channel.invokeMethod("chromeCast#didPlayerStatusUpdated", 2)
+            }
+        }
+    }
+
     override fun getView() = chromeCastButton
 
     override fun dispose() {
@@ -154,6 +173,9 @@ class ChromeCastController(
     // SessionManagerListener
 
     override fun onSessionStarted(p0: Session?, p1: String?) {
+        if(p0 is CastSession) {
+            p0?.remoteMediaClient?.registerCallback(mRemoteMediaClientListener);
+        }
         channel.invokeMethod("chromeCast#didStartSession", null)
     }
 

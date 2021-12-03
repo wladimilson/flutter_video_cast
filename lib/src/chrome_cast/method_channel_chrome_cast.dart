@@ -71,6 +71,11 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
   }
 
   @override
+  Stream<PlayerStatusDidUpdatedEvent> onPlayerStatusUpdated({int? id}) {
+    return _events(id).whereType<PlayerStatusDidUpdatedEvent>();
+  }
+
+  @override
   Future<void> loadMedia(String url, {required int id}) {
     final Map<String, dynamic> args = {'url': url};
     return channel(id)!.invokeMethod<void>('chromeCast#loadMedia', args);
@@ -157,6 +162,14 @@ class MethodChannelChromeCast extends ChromeCastPlatform {
       case 'chromeCast#requestDidFail':
         _eventStreamController
             .add(RequestDidFailEvent(id, call.arguments['error']));
+        break;
+      case 'chromeCast#didPlayerStatusUpdated':
+        var arg = 0;
+        if(call.arguments is int?)
+          arg = call.arguments ?? 0;
+
+        _eventStreamController
+            .add(PlayerStatusDidUpdatedEvent(id, arg));
         break;
       default:
         throw MissingPluginException();

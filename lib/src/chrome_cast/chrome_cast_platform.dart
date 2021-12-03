@@ -50,6 +50,11 @@ abstract class ChromeCastPlatform {
     throw UnimplementedError('onSessionEnded() has not been implemented.');
   }
 
+  /// Player status updated.
+  Stream<PlayerStatusDidUpdatedEvent> onPlayerStatusUpdated({required int id}) {
+    throw UnimplementedError('onPlayerStatusUpdated() has not been implemented.');
+  }
+
   /// Load a new media by providing an [url].
   Future<void> loadMedia(
     String url, {

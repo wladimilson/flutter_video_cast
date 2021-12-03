@@ -4,7 +4,9 @@ part of flutter_video_cast;
 ///
 /// Pass to [ChromeCastButton.onButtonCreated] to receive a [ChromeCastController]
 /// when the button is created.
-typedef void OnButtonCreated(ChromeCastController controller);
+typedef OnButtonCreated = void Function(ChromeCastController controller);
+
+typedef OnPlayerStatusUpdated = void Function(int statusCode);
 
 /// Callback method for when a request has failed.
 typedef void OnRequestFailed(String? error);
@@ -21,6 +23,7 @@ class ChromeCastButton extends StatelessWidget {
     this.onSessionEnded,
     this.onRequestCompleted,
     this.onRequestFailed,
+    this.onPlayerStatusUpdated
   })  : assert(
             defaultTargetPlatform == TargetPlatform.iOS ||
                 defaultTargetPlatform == TargetPlatform.android,
@@ -50,6 +53,9 @@ class ChromeCastButton extends StatelessWidget {
 
   /// Called when a cast request has failed.
   final OnRequestFailed? onRequestFailed;
+
+  /// Called when player status updated
+  final OnPlayerStatusUpdated? onPlayerStatusUpdated;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +96,11 @@ class ChromeCastButton extends StatelessWidget {
       _chromeCastPlatform
           .onRequestFailed(id: id)
           .listen((event) => onRequestFailed!(event.error));
+    }
+    if (onPlayerStatusUpdated != null) {
+      _chromeCastPlatform
+          .onPlayerStatusUpdated(id: id)
+          .listen((event) => onPlayerStatusUpdated!(event.status));
     }
   }
 }
