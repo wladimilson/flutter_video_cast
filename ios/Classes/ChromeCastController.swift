@@ -185,6 +185,7 @@ class ChromeCastController: NSObject, FlutterPlatformView {
 
 extension ChromeCastController: GCKSessionManagerListener {
     func sessionManager(_ sessionManager: GCKSessionManager, didStart session: GCKSession) {
+        session.remoteMediaClient?.add(self)
         channel.invokeMethod("chromeCast#didStartSession", arguments: nil)
     }
 
@@ -202,5 +203,19 @@ extension ChromeCastController: GCKRequestDelegate {
 
     func request(_ request: GCKRequest, didFailWithError error: GCKError) {
         channel.invokeMethod("chromeCast#requestDidFail", arguments: ["error" : error.localizedDescription])
+    }
+}
+
+// MARK: - GCKRemoteMediaClientListener
+extension ChromeCastController : GCKRemoteMediaClientListener {
+    func remoteMediaClient(_ client: GCKRemoteMediaClient, didUpdate mediaStatus: GCKMediaStatus?) {
+        let playerStatus: GCKMediaPlayerState = mediaStatus?.playerState ?? GCKMediaPlayerState.unknown
+        if (playerStatus == GCKMediaPlayerState.playing) {
+            channel.invokeMethod("chromeCast#didPlayerStatusUpdated", arguments: 1)
+        } else if (playerStatus == GCKMediaPlayerState.buffering) {
+            channel.invokeMethod("chromeCast#didPlayerStatusUpdated", arguments: 0)
+        } else if (playerStatus == GCKMediaPlayerState.idle && mediaStatus?.idleReason == GCKMediaPlayerIdleReason.finished) {
+            channel.invokeMethod("chromeCast#didPlayerStatusUpdated", arguments: 2)
+        }
     }
 }
